@@ -23,6 +23,7 @@ module.exports = {
   },
   networks: {
     mainnet: {
+      chainId: 56,
       url: 'https://bsc-dataseed.binance.org/',
       accounts: { mnemonic: process.env.MNEMONIC }
     },
