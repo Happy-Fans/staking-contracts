@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.4;
+pragma solidity 0.8.7;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -36,6 +36,8 @@ contract StakePool is Ownable {
         uint256 amount;
         // Reward debt. See explanation below.
         uint256 rewardDebt;
+        // Block that save the start of user's staking period.
+        uint256 stakingStartBlock;
         //
         // Any point in time, the amount of reward tokens entitled to a user
         // but is pending to be distributed is:
@@ -69,6 +71,8 @@ contract StakePool is Ownable {
     uint256 public rewardPerBlock;
     /// @dev Info of each user that stakes tokens.
     mapping (address => UserInfo) public usersInfo;
+    /// @dev Duration of locking period in blocks.
+    uint256 public lockingPeriodBlock;
 
     /// @dev Emitter when `user` deposits some tokens.
     event Deposit(address indexed user, uint256 amount);
@@ -87,14 +91,24 @@ contract StakePool is Ownable {
         IERC20 rewardToken_,
         uint256 startBlock_,
         uint256 endBlock_,
-        uint256 rewardPerBlock_
+        uint256 rewardPerBlock_,
+        uint256 lockingPeriodBlock_
     ) {
         stakeToken = stakeToken_;
         rewardToken = rewardToken_;
         startBlock = startBlock_;
         endBlock = endBlock_;
         rewardPerBlock = rewardPerBlock_;
+        lockingPeriodBlock_ = lockingPeriodBlock;
         rewardTreasury = new RewardTreasury(rewardToken_);
+    }
+
+    /**
+        * @dev Set the locking period in blocks.
+     */
+    //TODO Verify
+    function setLockingPeriodInBlock(uint256 lockingPeriodBlock_) external onlyOwner {
+        lockingPeriodBlock = lockingPeriodBlock_;
     }
 
     /**
@@ -157,21 +171,30 @@ contract StakePool is Ownable {
         require(block.number >= startBlock, "Pool: pool is not open yet");
         require(block.number < endBlock, "Pool: pool is already closed");
 
+
         UserInfo storage userInfo = usersInfo[msg.sender];
 
         _updatePool();
 
-        if (userInfo.amount > 0) {
-            _sendReward(msg.sender);
+        if (lockingPeriodBlock > 0) {
+
+            userInfo.amount = amount;
+            userInfo.stakingStartBlock = block.number;
+        } else {
+
+            if (userInfo.amount > 0) {
+                _sendReward(msg.sender);
+            }
+            userInfo.amount += amount;
+
         }
 
-        userInfo.amount += amount;
         userInfo.rewardDebt = userInfo.amount * accRewardPerShare / 1e12;
         totalStakedTokens += amount;
-
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
 
         emit Deposit(msg.sender, amount);
+
     }
 
     /**
@@ -184,6 +207,11 @@ contract StakePool is Ownable {
 
         UserInfo storage userInfo = usersInfo[msg.sender];
 
+        //TODO Verify
+        if (lockingPeriodBlock > 0) {
+            uint256 stakingEndBlock = userInfo.stakingStartBlock + lockingPeriodBlock;
+            require(stakingEndBlock > block.number, "Pool: lock period not over yet");
+        }
         require(userInfo.amount >= amount, "Pool: not enough staked tokens");
 
         _updatePool();
@@ -215,9 +243,14 @@ contract StakePool is Ownable {
      *
      * Only for emergencies.
      */
+    //TODO Verify if needs to be deleted
     function emergencyWithdraw() external {
         UserInfo storage userInfo = usersInfo[msg.sender];
 
+        if (lockingPeriodBlock > 0) {
+            uint256 stakingEndBlock = userInfo.stakingStartBlock + lockingPeriodBlock;
+            require(stakingEndBlock > block.number, "Pool: lock period not over yet");
+        }
         require(userInfo.amount > 0, "Pool: nothing to withdraw");
 
         uint256 amount = userInfo.amount;

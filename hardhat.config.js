@@ -13,7 +13,7 @@ require('dotenv').config();
  */
 module.exports = {
   solidity: {
-    version: '0.8.4',
+    version: '0.8.7',
     settings: {
       optimizer: {
         enabled: true,
@@ -50,7 +50,7 @@ module.exports = {
     happyFansToken: {
       default: 1,
       mainnet: '0xf5d8a096cccb31b9d7bce5afe812be23e3d4690d',
-      testnet: '0x8959F7C84aa1d8387cdB8f04f5023146C6f1B39e'
+      testnet: '0x3051A82bc747Fc6A98c5Ff64b1B7F03bF779EcDB'
     },
     lpToken: {
       default: 2,

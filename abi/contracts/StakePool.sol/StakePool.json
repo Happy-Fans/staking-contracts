@@ -25,6 +25,11 @@
         "internalType": "uint256",
         "name": "rewardPerBlock_",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lockingPeriodBlock_",
+        "type": "uint256"
       }
     ],
     "stateMutability": "nonpayable",
@@ -225,6 +230,19 @@
   },
   {
     "inputs": [],
+    "name": "lockingPeriodBlock",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -312,6 +330,19 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "lockingPeriodBlock_",
+        "type": "uint256"
+      }
+    ],
+    "name": "setLockingPeriodInBlock",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "rewardPerBlock_",
         "type": "uint256"
       }
@@ -391,6 +422,11 @@
       {
         "internalType": "uint256",
         "name": "rewardDebt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "stakingStartBlock",
         "type": "uint256"
       }
     ],
