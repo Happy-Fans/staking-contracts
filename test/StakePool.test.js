@@ -309,6 +309,7 @@ contract('StakePool', accounts => {
               await time.advanceBlockTo(latestBlock.add(actualLockingPeriodBlock));
             });
 
+            //TODO understand why test dont pass on last expect
             it('should withdraw tokens and automatically claim pending reward', async () => {
               const result = await this.pool.withdraw(this.amount, {from: bob});
               expectEvent(result, 'Withdraw', {user: bob, amount: this.amount});
@@ -320,9 +321,13 @@ contract('StakePool', accounts => {
               const totalStakedTokens = await this.pool.totalStakedTokens();
               expect(totalStakedTokens).to.be.bignumber.equal('0');
               const claimBlock = new BN(result.receipt.blockNumber);
+              console.log(claimBlock.toString());
               const elapsedBlocks = claimBlock.sub(this.depositBlock);
+              console.log(elapsedBlocks.toString());
               const expectedReward = elapsedBlocks.mul(rewardPerBlock);
+              console.log(expectedReward.toString());
               const actualReward = await this.rewardToken.balanceOf(bob);
+              console.log(actualReward.toString());
               expect(actualReward).to.be.bignumber.equal(expectedReward);
             });
 
