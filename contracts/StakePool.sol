@@ -99,14 +99,24 @@ contract StakePool is Ownable {
         startBlock = startBlock_;
         endBlock = endBlock_;
         rewardPerBlock = rewardPerBlock_;
-        lockingPeriodBlock_ = lockingPeriodBlock;
+        lockingPeriodBlock = lockingPeriodBlock_;
         rewardTreasury = new RewardTreasury(rewardToken_);
+    }
+    /**
+        * @dev Get the user staking locked end_block.
+     */
+    function getStakingEndBlock( address user ) public view returns(uint256 stakingEndBlock) {
+        UserInfo storage userInfo = usersInfo[user];
+        if( userInfo.stakingStartBlock > 0)
+        stakingEndBlock = userInfo.stakingStartBlock + lockingPeriodBlock;
+        else stakingEndBlock = 0;
+        return stakingEndBlock;
     }
 
     /**
         * @dev Set the locking period in blocks.
      */
-    //TODO Verify
+    //TODO Remove before deploy
     function setLockingPeriodInBlock(uint256 lockingPeriodBlock_) external onlyOwner {
         lockingPeriodBlock = lockingPeriodBlock_;
     }
@@ -209,7 +219,7 @@ contract StakePool is Ownable {
 
         //TODO Verify
         if (lockingPeriodBlock > 0) {
-            uint256 stakingEndBlock = userInfo.stakingStartBlock + lockingPeriodBlock;
+            uint256 stakingEndBlock = getStakingEndBlock(msg.sender);
             require(stakingEndBlock <= block.number, "Pool: lock period not over yet");
         }
         require(userInfo.amount >= amount, "Pool: not enough staked tokens");
@@ -233,6 +243,7 @@ contract StakePool is Ownable {
     /**
      * @dev Sends all the accrued reward to user's wallet.
      */
+
     function claimReward() external {
         UserInfo storage userInfo = usersInfo[msg.sender];
 
@@ -252,7 +263,7 @@ contract StakePool is Ownable {
         UserInfo storage userInfo = usersInfo[msg.sender];
 
         if (lockingPeriodBlock > 0) {
-            uint256 stakingEndBlock = userInfo.stakingStartBlock + lockingPeriodBlock;
+            uint256 stakingEndBlock = getStakingEndBlock(msg.sender);
             require(stakingEndBlock <= block.number, "Pool: lock period not over yet");
         }
         require(userInfo.amount > 0, "Pool: nothing to withdraw");
