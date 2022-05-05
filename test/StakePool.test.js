@@ -281,62 +281,64 @@ contract('StakePool', accounts => {
         describe('after deposit with locking period', () => {
 
           beforeEach(async () => {
-            this.amount = new BN('1000');
             await this.stakeToken.transfer(bob, this.amount, {from: owner});
             await this.stakeToken.approve(this.pool.address, this.amount, {from: bob});
             const result = await this.pool.deposit(this.amount, {from: bob});
             this.depositBlock = new BN(result.receipt.blockNumber);
           });
 
-          it('reverts when withdrawing with user staking end block greater than current block', async () => {
+          it('reverts when withdrawing before locking period', async () => {
             await expectRevert(
-                this.pool.withdraw(this.amount, { from: bob }),
+                this.pool.withdraw(this.amount, {from: bob}),
                 'Pool: lock period not over yet'
             );
           });
 
-          it('reverts when emergency withdrawing with user staking end block greater than current block', async () => {
+          it('reverts when emergency withdrawing before locking period', async () => {
             await expectRevert(
-                this.pool.emergencyWithdraw({ from: bob }),
+                this.pool.emergencyWithdraw({from: bob}),
                 'Pool: lock period not over yet'
             );
           });
 
-          beforeEach(async () => {
-            const latestBlock = await time.latestBlock();
-            const actualLockingPeriodBlock = await this.pool.lockingPeriodBlock();
-            await time.advanceBlockTo(latestBlock.add(actualLockingPeriodBlock));
-          });
+          describe('withdraw after locking period', () => {
 
-          it('should withdraw tokens and automatically claim pending reward', async () => {
-            const result = await this.pool.withdraw(this.amount, { from: bob });
-            expectEvent(result, 'Withdraw', { user: bob, amount: this.amount });
-            const balance = await this.stakeToken.balanceOf(bob);
-            expect(balance).to.be.bignumber.equal(this.amount);
-            const userInfo = await this.pool.usersInfo(bob);
-            expect(userInfo.amount).to.be.bignumber.equal('0');
-            expect(userInfo.stakingStartBlock).to.be.bignumber.equal('0');
-            const totalStakedTokens = await this.pool.totalStakedTokens();
-            expect(totalStakedTokens).to.be.bignumber.equal('0');
-            const claimBlock = new BN(result.receipt.blockNumber);
-            const elapsedBlocks = claimBlock.sub(this.depositBlock);
-            const expectedReward = elapsedBlocks.mul(rewardPerBlock);
-            const actualReward = await this.rewardToken.balanceOf(bob);
-            expect(actualReward).to.be.bignumber.equal(expectedReward);
-          });
+            beforeEach(async () => {
+              const latestBlock = await time.latestBlock();
+              const actualLockingPeriodBlock = await this.pool.lockingPeriodBlock();
+              await time.advanceBlockTo(latestBlock.add(actualLockingPeriodBlock));
+            });
 
-          it('should peform an emergency withdraw', async () => {
-            const result = await this.pool.emergencyWithdraw({ from: bob });
-            expectEvent(result, 'EmergencyWithdraw', { user: bob, amount: this.amount });
-            const balance = await this.stakeToken.balanceOf(bob);
-            expect(balance).to.be.bignumber.equal(this.amount);
-            const userInfo = await this.pool.usersInfo(bob);
-            expect(userInfo.amount).to.be.bignumber.equal('0');
-            expect(userInfo.stakingStartBlock).to.be.bignumber.equal('0');
-            const pendingReward = await this.pool.getPendingReward(bob);
-            expect(pendingReward).to.be.bignumber.equal('0');
-            const sentReward = await this.rewardToken.balanceOf(bob);
-            expect(sentReward).to.be.bignumber.equal('0');
+            it('should withdraw tokens and automatically claim pending reward', async () => {
+              const result = await this.pool.withdraw(this.amount, {from: bob});
+              expectEvent(result, 'Withdraw', {user: bob, amount: this.amount});
+              const balance = await this.stakeToken.balanceOf(bob);
+              expect(balance).to.be.bignumber.equal(this.amount);
+              const userInfo = await this.pool.usersInfo(bob);
+              expect(userInfo.amount).to.be.bignumber.equal('0');
+              expect(userInfo.stakingStartBlock).to.be.bignumber.equal('0');
+              const totalStakedTokens = await this.pool.totalStakedTokens();
+              expect(totalStakedTokens).to.be.bignumber.equal('0');
+              const claimBlock = new BN(result.receipt.blockNumber);
+              const elapsedBlocks = claimBlock.sub(this.depositBlock);
+              const expectedReward = elapsedBlocks.mul(rewardPerBlock);
+              const actualReward = await this.rewardToken.balanceOf(bob);
+              expect(actualReward).to.be.bignumber.equal(expectedReward);
+            });
+
+            it('should perform an emergency withdraw', async () => {
+              const result = await this.pool.emergencyWithdraw({from: bob});
+              expectEvent(result, 'EmergencyWithdraw', {user: bob, amount: this.amount});
+              const balance = await this.stakeToken.balanceOf(bob);
+              expect(balance).to.be.bignumber.equal(this.amount);
+              const userInfo = await this.pool.usersInfo(bob);
+              expect(userInfo.amount).to.be.bignumber.equal('0');
+              expect(userInfo.stakingStartBlock).to.be.bignumber.equal('0');
+              const pendingReward = await this.pool.getPendingReward(bob);
+              expect(pendingReward).to.be.bignumber.equal('0');
+              const sentReward = await this.rewardToken.balanceOf(bob);
+              expect(sentReward).to.be.bignumber.equal('0');
+            });
           });
         });
       });
