@@ -210,7 +210,7 @@ contract StakePool is Ownable {
         //TODO Verify
         if (lockingPeriodBlock > 0) {
             uint256 stakingEndBlock = userInfo.stakingStartBlock + lockingPeriodBlock;
-            require(stakingEndBlock > block.number, "Pool: lock period not over yet");
+            require(stakingEndBlock <= block.number, "Pool: lock period not over yet");
         }
         require(userInfo.amount >= amount, "Pool: not enough staked tokens");
 
@@ -220,6 +220,10 @@ contract StakePool is Ownable {
         userInfo.amount -= amount;
         userInfo.rewardDebt = userInfo.amount * accRewardPerShare / 1e12;
         totalStakedTokens -= amount;
+
+        //TODO Verify
+        if ( userInfo.amount == 0 && userInfo.rewardDebt == 0 && userInfo.stakingStartBlock != 0)
+            userInfo.stakingStartBlock = 0;
 
         stakeToken.safeTransfer(msg.sender, amount);
 
@@ -249,7 +253,7 @@ contract StakePool is Ownable {
 
         if (lockingPeriodBlock > 0) {
             uint256 stakingEndBlock = userInfo.stakingStartBlock + lockingPeriodBlock;
-            require(stakingEndBlock > block.number, "Pool: lock period not over yet");
+            require(stakingEndBlock <= block.number, "Pool: lock period not over yet");
         }
         require(userInfo.amount > 0, "Pool: nothing to withdraw");
 
@@ -257,6 +261,7 @@ contract StakePool is Ownable {
 
         userInfo.amount = 0;
         userInfo.rewardDebt = 0;
+        userInfo.stakingStartBlock = 0;
         totalStakedTokens -= amount;
 
         stakeToken.safeTransfer(msg.sender, amount);

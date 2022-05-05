@@ -1,7 +1,7 @@
 const { ethers, getNamedAccounts } = require('hardhat');
 
-//npx hardhat run --network bscTestnet C:\Users\anton\Desktop\HappyFans\staking-contracts\scripts\deploy-locked-staking.js
-//npx hardhat verify --network bscTestnet 0xaaabfF946B8BA993D84C1B7edd86b2951e00FB32 "0x3051A82bc747Fc6A98c5Ff64b1B7F03bF779EcDB" "0x3051A82bc747Fc6A98c5Ff64b1B7F03bF779EcDB" "12020742" "17494742" "100000000" "1200"
+//npx hardhat run --network bscTestnet B:\Projects\Happy_Fans\staking-contracts\scripts\deploy-locked-staking.js
+//npx hardhat verify --network bscTestnet 0xe41C53c5442e8230A218a349661b6D72Ff946b2F "0x3051A82bc747Fc6A98c5Ff64b1B7F03bF779EcDB" "0x3051A82bc747Fc6A98c5Ff64b1B7F03bF779EcDB" "12020742" "17494742" "100000000" "1200"
 
 async function main () {
     const { owner, happyFansToken } = await getNamedAccounts();
