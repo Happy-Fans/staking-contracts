@@ -69,10 +69,10 @@ contract StakePool is Ownable {
     uint256 public endBlock;
     /// @dev Reward tokens to be distributed per block.
     uint256 public rewardPerBlock;
-    /// @dev Info of each user that stakes tokens.
-    mapping (address => UserInfo) public usersInfo;
     /// @dev Duration of locking period in blocks.
     uint256 public lockingPeriodBlock;
+    /// @dev Info of each user that stakes tokens.
+    mapping (address => UserInfo) public usersInfo;
 
     /// @dev Emitter when `user` deposits some tokens.
     event Deposit(address indexed user, uint256 amount);
@@ -102,23 +102,25 @@ contract StakePool is Ownable {
         lockingPeriodBlock = lockingPeriodBlock_;
         rewardTreasury = new RewardTreasury(rewardToken_);
     }
-    /**
-        * @dev Get the user staking locked end_block.
-     */
-    function getStakingEndBlock( address user ) public view returns(uint256 stakingEndBlock) {
-        UserInfo storage userInfo = usersInfo[user];
-        if( userInfo.stakingStartBlock > 0)
-        stakingEndBlock = userInfo.stakingStartBlock + lockingPeriodBlock;
-        else stakingEndBlock = 0;
-        return stakingEndBlock;
-    }
 
-    /**
-        * @dev Set the locking period in blocks.
-     */
     //TODO Remove before deploy
     function setLockingPeriodInBlock(uint256 lockingPeriodBlock_) external onlyOwner {
         lockingPeriodBlock = lockingPeriodBlock_;
+    }
+
+    /**
+        * @dev Get the user staking locked end_block.
+     */
+    function getStakingEndBlock(address user) public view returns(uint256 stakingEndBlock) {
+        UserInfo storage userInfo = usersInfo[user];
+
+        if (userInfo.stakingStartBlock > 0) {
+            stakingEndBlock = userInfo.stakingStartBlock + lockingPeriodBlock;
+        } else {
+            stakingEndBlock = 0;
+        }
+
+        return stakingEndBlock;
     }
 
     /**
@@ -181,22 +183,18 @@ contract StakePool is Ownable {
         require(block.number >= startBlock, "Pool: pool is not open yet");
         require(block.number < endBlock, "Pool: pool is already closed");
 
-
         UserInfo storage userInfo = usersInfo[msg.sender];
 
         _updatePool();
 
         if (lockingPeriodBlock > 0) {
-
             userInfo.amount = amount;
             userInfo.stakingStartBlock = block.number;
         } else {
-
             if (userInfo.amount > 0) {
                 _sendReward(msg.sender);
             }
             userInfo.amount += amount;
-
         }
 
         userInfo.rewardDebt = userInfo.amount * accRewardPerShare / 1e12;
@@ -204,7 +202,6 @@ contract StakePool is Ownable {
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
 
         emit Deposit(msg.sender, amount);
-
     }
 
     /**
@@ -217,7 +214,6 @@ contract StakePool is Ownable {
 
         UserInfo storage userInfo = usersInfo[msg.sender];
 
-        //TODO Verify
         if (lockingPeriodBlock > 0) {
             uint256 stakingEndBlock = getStakingEndBlock(msg.sender);
             require(stakingEndBlock <= block.number, "Pool: lock period not over yet");
@@ -229,11 +225,10 @@ contract StakePool is Ownable {
 
         userInfo.amount -= amount;
         userInfo.rewardDebt = userInfo.amount * accRewardPerShare / 1e12;
-        totalStakedTokens -= amount;
-
-        //TODO Verify
-        if ( userInfo.amount == 0 && userInfo.rewardDebt == 0 && userInfo.stakingStartBlock != 0)
+        if ( userInfo.amount == 0 && userInfo.rewardDebt == 0 && userInfo.stakingStartBlock != 0) {
             userInfo.stakingStartBlock = 0;
+        }
+        totalStakedTokens -= amount;
 
         stakeToken.safeTransfer(msg.sender, amount);
 
@@ -241,24 +236,10 @@ contract StakePool is Ownable {
     }
 
     /**
-     * @dev Sends all the accrued reward to user's wallet.
-     */
-
-    function claimReward() external {
-        UserInfo storage userInfo = usersInfo[msg.sender];
-
-        require(userInfo.amount > 0, "Pool: no staked token");
-
-        _updatePool();
-        _sendReward(msg.sender);
-    }
-
-    /**
-     * @dev Withdraws all tokens without caring about the reward.
+ * @dev Withdraws all tokens without caring about the reward.
      *
      * Only for emergencies.
      */
-    //TODO Verify if needs to be deleted
     function emergencyWithdraw() external {
         UserInfo storage userInfo = usersInfo[msg.sender];
 
@@ -278,6 +259,19 @@ contract StakePool is Ownable {
         stakeToken.safeTransfer(msg.sender, amount);
 
         emit EmergencyWithdraw(msg.sender, amount);
+    }
+
+    /**
+     * @dev Sends all the accrued reward to user's wallet.
+     */
+
+    function claimReward() external {
+        UserInfo storage userInfo = usersInfo[msg.sender];
+
+        require(userInfo.amount > 0, "Pool: no staked token");
+
+        _updatePool();
+        _sendReward(msg.sender);
     }
 
     /**

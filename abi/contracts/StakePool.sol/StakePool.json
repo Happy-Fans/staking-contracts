@@ -216,6 +216,25 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getStakingEndBlock",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "stakingEndBlock",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "lastRewardBlock",
     "outputs": [
