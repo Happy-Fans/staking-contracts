@@ -187,14 +187,14 @@ contract StakePool is Ownable {
 
         _updatePool();
 
+        if (userInfo.amount > 0) {
+            _sendReward(msg.sender);
+        }
+
+        userInfo.amount += amount;
+
         if (lockingPeriodBlock > 0) {
-            userInfo.amount = amount;
             userInfo.stakingStartBlock = block.number;
-        } else {
-            if (userInfo.amount > 0) {
-                _sendReward(msg.sender);
-            }
-            userInfo.amount += amount;
         }
 
         userInfo.rewardDebt = userInfo.amount * accRewardPerShare / 1e12;
