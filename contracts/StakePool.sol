@@ -283,6 +283,11 @@ contract StakePool is Ownable {
         uint256 lastProfitableBlock = block.number > endBlock ? endBlock : block.number;
         uint256 currentAccRewardPerShare = accRewardPerShare;
 
+        if (lockingPeriodBlock > 0) {
+            uint256 stakingEndBlock = getStakingEndBlock(msg.sender);
+            lastProfitableBlock = lastProfitableBlock > stakingEndBlock ? stakingEndBlock : lastProfitableBlock;
+        }
+
         if (lastProfitableBlock > lastRewardBlock && totalStakedTokens != 0) {
             uint256 elapsedBlocks = lastProfitableBlock - lastRewardBlock;
             uint256 reward = rewardPerBlock * elapsedBlocks;
