@@ -284,7 +284,7 @@ contract StakePool is Ownable {
         uint256 currentAccRewardPerShare = accRewardPerShare;
 
         if (lockingPeriodBlock > 0) {
-            uint256 stakingEndBlock = getStakingEndBlock(msg.sender);
+            uint256 stakingEndBlock = userInfo.stakingStartBlock + lockingPeriodBlock;
             lastProfitableBlock = lastProfitableBlock > stakingEndBlock ? stakingEndBlock : lastProfitableBlock;
         }
 
