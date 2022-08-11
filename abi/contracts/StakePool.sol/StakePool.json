@@ -349,19 +349,6 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "lockingPeriodBlock_",
-        "type": "uint256"
-      }
-    ],
-    "name": "setLockingPeriodInBlock",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
         "name": "rewardPerBlock_",
         "type": "uint256"
       }

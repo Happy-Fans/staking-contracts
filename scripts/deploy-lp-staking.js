@@ -6,6 +6,7 @@ async function main () {
     const START_BLOCK = 12020742;
     const END_BLOCK = 12884742;
     const REWARD_PER_BLOCK = ethers.utils.parseEther('100');
+    const LOCKING_PERIOD_BLOCK = 0;
 
     const StakePool = await ethers.getContractFactory('StakePool');
 
@@ -14,12 +15,13 @@ async function main () {
         happyFansToken,
         START_BLOCK,
         END_BLOCK,
-        REWARD_PER_BLOCK
+        REWARD_PER_BLOCK,
+        LOCKING_PERIOD_BLOCK
     );
 
     await stakePool.transferOwnership(owner);
 
-    console.log(`StakePool: ${stakePool.address}`);
+    console.log(`StakePoolLP: ${stakePool.address}`);
 }
 
 main()
