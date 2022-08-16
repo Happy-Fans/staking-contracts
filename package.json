@@ -1,17 +1,9 @@
 {
-  "name": "staking-contracts",
+  "author": "B2B",
+  "license": "MIT",
+  "name": "Staking Contracts",
   "version": "1.0.0",
-  "author": "happy fans",
-  "description": "Staking smart contracts that allow users to stake tokens in exchange for rewards",
-  "scripts": {
-    "compile": "hardhat compile",
-    "test": "hardhat test",
-    "coverage": "hardhat coverage",
-    "size": "hardhat size-contracts",
-    "lint:sol": "solhint \"contracts/**/*.sol\"",
-    "lint:js": "eslint --ignore-path .gitignore .",
-    "lint:js:fix": "eslint --ignore-path .gitignore . --fix"
-  },
+  "description": "Staking Smart Contracts that allow users to stake tokens in exchange for rewards",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.0.4",
@@ -28,5 +20,14 @@
     "solhint": "^3.3.4",
     "solidity-coverage": "^0.7.16",
     "web3": "^1.3.5"
+  },
+  "scripts": {
+    "deploy": "npx hardhat run --network {network_name} ../deploy.js",
+    "verify": "npx hardhat verify --network {network_name} {contract_address} {args}",
+    "test": "npx hardhat test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Happy-Fans/staking-contracts.git"
   }
 }
