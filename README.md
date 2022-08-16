@@ -1,5 +1,4 @@
-# Staking contracts
-
+# Vesting Application
 Staking smart contracts that allow users to stake tokens in exchange for rewards.
 
 HAPPY Pool | Contract Address
