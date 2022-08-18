@@ -23,7 +23,9 @@
   },
   "scripts": {
     "build": "npx hardhat compile",
-    "deploy": "npx hardhat run --network {network_name} ../deploy.js",
+    "deploy_locked": "npx hardhat run --network {network_name} ../deploy-locked-staking.js",
+    "deploy_lp": "npx hardhat run --network {network_name} ../deploy-lp-staking.js",
+    "deploy_single": "npx hardhat run --network {network_name} ../deploy-single-staking.js",
     "verify": "npx hardhat verify --network {network_name} {contract_address} {args}",
     "test": "npx hardhat test"
   },
