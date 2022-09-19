@@ -1,7 +1,7 @@
 {
   "author": "B2B",
   "license": "MIT",
-  "name": "Staking Contracts",
+  "name": "staking-contracts",
   "version": "2.0.0",
   "description": "Staking Smart Contracts that allow users to stake tokens in exchange for rewards",
   "devDependencies": {
