@@ -89,6 +89,7 @@ contract StakePool is Ownable {
     constructor(
         IERC20 stakeToken_,
         IERC20 rewardToken_,
+        RewardTreasury rewardTreasury_,
         uint256 startBlock_,
         uint256 endBlock_,
         uint256 rewardPerBlock_,
@@ -100,7 +101,7 @@ contract StakePool is Ownable {
         endBlock = endBlock_;
         rewardPerBlock = rewardPerBlock_;
         lockingPeriodBlock = lockingPeriodBlock_;
-        rewardTreasury = new RewardTreasury(rewardToken_);
+        rewardTreasury = rewardTreasury_;
     }
 
     /**
